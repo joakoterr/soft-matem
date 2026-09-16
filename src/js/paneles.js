@@ -229,8 +229,28 @@ function pantallaProgreso(v) {
    ----------------------------------------------------------- */
 
 const CHAT = [];
-let sampleNs;              // undefined = sin pedir, null = no disponible
+let sampleNs;              // undefined = sin probar, null = no disponible
 let profeOcupado = false;
+
+/**
+ * ¿Mostrar la solapa del profe? Alcanza con que exista el runtime de
+ * Claude: así aparece al instante en el Artifact, sin esperar la sonda.
+ * Publicada como sitio estático no existe, y la solapa no se muestra.
+ */
+function hayProfe() {
+  return sampleNs ? true : !!(window.claude && window.claude.use);
+}
+
+/**
+ * El profe con IA sólo existe donde corre `claude.use`. Fuera de ahí
+ * (por ejemplo publicado como sitio estático) la solapa ni se muestra.
+ */
+async function probarProfe() {
+  if (sampleNs !== undefined) return sampleNs;
+  try { sampleNs = (window.claude && claude.use) ? await claude.use('sample') : null; }
+  catch (e) { sampleNs = null; }
+  return sampleNs;
+}
 
 const PREAMBULO = [
   'Sos profesor particular de Análisis Matemático III (Ingeniería en Informática, 2.º año, Universidad de Belgrano, cátedra Karina Di Fazio).',
@@ -333,9 +353,7 @@ async function preguntar(texto) {
   const q = String(texto || '').trim();
   if (!q || profeOcupado) return;
 
-  if (sampleNs === undefined) {
-    try { sampleNs = (window.claude && claude.use) ? await claude.use('sample') : null; } catch (e) { sampleNs = null; }
-  }
+  await probarProfe();
 
   CHAT.push({ rol: 'user', texto: q });
   const caja = $('#pregunta');

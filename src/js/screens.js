@@ -51,7 +51,9 @@ function pintarNav() {
   const n = $('#nav');
   n.textContent = '';
   const pend = Juego.cuantasPendientes();
-  for (const s of SECCIONES) {
+  const visibles = SECCIONES.filter((s) => s.id !== 'profe' || hayProfe());
+  n.style.gridTemplateColumns = 'repeat(' + visibles.length + ', 1fr)';
+  for (const s of visibles) {
     const rot = s.id === 'practica' && pend > 0 ? s.rot + ' ' + pend : s.rot;
     n.appendChild(el('button', {
       type: 'button',
@@ -170,7 +172,9 @@ function pantallaMapa(v) {
     el('div', { cls: 'glifo', txt: '∫' }),
     el('p', { txt: CURSO.materia }),
     el('p', { estilo: { fontSize: 'var(--t-xs)' }, txt: CURSO.catedra }),
-    el('p', { estilo: { fontSize: 'var(--t-xs)' }, txt: CURSO.alcance })));
+    el('p', { estilo: { fontSize: 'var(--t-xs)' }, txt: CURSO.alcance }),
+    el('p', { estilo: { fontSize: 'var(--t-xs)', marginTop: '10px', maxWidth: '38ch', marginInline: 'auto' },
+      txt: CURSO.aviso })));
 }
 
 function trazarSendero(cont, n) {

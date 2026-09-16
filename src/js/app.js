@@ -45,6 +45,12 @@ function arrancar(previo) {
   document.addEventListener('keydown', atajos);
   window.addEventListener('resize', alRedimensionar);
 
+  // La solapa del profe aparece recién cuando se confirma la capacidad.
+  probarProfe().then(() => {
+    pintarNav();
+    if (vistaActual === 'profe' && !hayProfe()) ir('mapa');
+  });
+
   // El almacén remoto responde tarde: cuando llega, se repinta.
   setTimeout(() => { if (!Sesion) dibujar(); }, 1200);
 }

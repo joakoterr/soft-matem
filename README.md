@@ -84,6 +84,36 @@ Tipos disponibles: `mc` (una correcta), `multi` (varias), `vf` (verdadero o fals
 `in` (escribir), `ord` (ordenar pasos), `par` (emparejar) y `hue` (completar huecos).
 La matemática se escribe entre `$…$` y se tipografía con KaTeX.
 
+## Publicarlo como sitio
+
+`node tools/build.mjs` genera dos salidas de la misma fuente:
+
+- `dist/index.html` — sólo el cuerpo, que es lo que espera la plataforma de
+  Artifacts (ella agrega el `<!doctype>`, el `<head>` y el `<body>`).
+- `public/index.html` — la página completa, con metadatos Open Graph, favicon
+  y `theme-color`. Sirve para abrir con doble clic y para cualquier hosting
+  estático.
+
+`vercel.json` deja el proyecto configurado: sin framework, `node tools/build.mjs`
+como build y `public` como directorio de salida.
+
+Lo más rápido, sin repositorio:
+
+```sh
+cd public && npx vercel --prod
+```
+
+O conectando el repo desde el panel de Vercel, que toma `vercel.json` y no hay
+nada que configurar.
+
+### El profe con IA depende del entorno
+
+La solapa **Profe** usa la capacidad `sample`, que sólo existe dentro de
+claude.ai. Publicada como sitio estático no aparece: la navegación se arma
+con cuatro solapas en vez de cinco. Todo lo demás —las 39 lecciones, el
+repaso espaciado, las fórmulas y el progreso— funciona igual, guardando en
+`localStorage`.
+
 ## Modo exploración
 
 Viene activado: todas las lecciones están abiertas desde el arranque, así se puede
