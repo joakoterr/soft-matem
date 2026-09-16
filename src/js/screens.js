@@ -101,7 +101,9 @@ function pantallaMapa(v) {
   v.appendChild(el('div', { cls: 'saludo', estilo: { '--u': 'var(--' + sig.u.id + ')' } },
     el('div', { cls: 'rotulo-eyebrow', estilo: { color: 'var(--u)' }, txt: 'Seguí acá' }),
     el('h1', { txt: sig.l.titulo }),
-    el('p', { txt: 'Unidad ' + sig.u.n + ' · ' + sig.u.titulo + ' · ' + dom + ' % del curso' })));
+    el('p', { txt: 'Unidad ' + sig.u.n + ' · ' + sig.u.titulo + ' · ' + dom + ' % del curso' }),
+    Store.est.libre ? el('p', { estilo: { marginTop: '8px' } },
+      el('span', { cls: 'cinta ok', txt: '\u2713 Modo exploración: todo abierto' })) : null));
 
   v.appendChild(el('button', {
     cls: 'btn btn-primario btn-ancho', type: 'button',

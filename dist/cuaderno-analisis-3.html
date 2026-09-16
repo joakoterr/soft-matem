@@ -866,6 +866,32 @@ table.datos td.f { color: var(--rojo); font-weight: 700; }
 .medalla .nom { font-size: var(--t-xs); font-weight: 700; margin-top: 4px; line-height: 1.3; }
 .medalla .desc { font-size: 10px; color: var(--tinta-3); line-height: 1.35; margin-top: 2px; }
 
+/* ---------- interruptor de preferencias ---------- */
+
+.fila-conf { display: flex; align-items: flex-start; gap: 14px; }
+.fila-conf .txt { flex: 1; min-width: 0; }
+.fila-conf .txt strong { display: block; font-size: var(--t-md); }
+.fila-conf .txt span { display: block; font-size: var(--t-xs); color: var(--tinta-2); line-height: 1.45; margin-top: 2px; }
+
+.perilla {
+  appearance: none; border: 0; cursor: pointer; flex: none;
+  width: 48px; height: 28px; border-radius: 999px;
+  background: var(--borde-2);
+  position: relative;
+  transition: background .18s;
+  margin-top: 2px;
+}
+.perilla::after {
+  content: '';
+  position: absolute; top: 3px; left: 3px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .32);
+  transition: transform .18s;
+}
+.perilla[aria-checked="true"] { background: var(--correcto); }
+.perilla[aria-checked="true"]::after { transform: translateX(20px); }
+
 /* ============================================================
    Fórmulas
    ============================================================ */
@@ -3916,6 +3942,7 @@ function estadoNuevo() {
     respuestas: 0,
     segundos: 0,
     meta: 30,          // XP por día
+    libre: true,       // modo exploración: todas las lecciones abiertas
   };
 }
 
@@ -3931,6 +3958,9 @@ function fundir(a, b) {
   r.respuestas = max('respuestas');
   r.segundos = max('segundos');
   r.meta = (a.actualizado > b.actualizado ? a.meta : b.meta) || 30;
+  // Una preferencia no se "maximiza": gana la del estado más reciente.
+  const reciente = (a.actualizado || 0) >= (b.actualizado || 0) ? a : b;
+  r.libre = reciente.libre !== false;
 
   r.dias = Object.assign({}, a.dias);
   for (const d in (b.dias || {})) r.dias[d] = Math.max(r.dias[d] || 0, b.dias[d]);
@@ -4193,8 +4223,12 @@ const Juego = {
     return this.abierta(id) ? 'abierto' : 'cerrado';
   },
 
-  /** Se abre la primera lección del curso y la siguiente a cada una ya hecha. */
+  /**
+   * En modo exploración está todo abierto. Si no, se abre la primera
+   * lección del curso y la siguiente a cada una ya hecha.
+   */
   abierta(id) {
+    if (Store.est.libre) return true;
     const todas = this.lecciones();
     const i = todas.findIndex((x) => x.l.id === id);
     if (i <= 0) return i === 0;
@@ -4864,7 +4898,9 @@ function pantallaMapa(v) {
   v.appendChild(el('div', { cls: 'saludo', estilo: { '--u': 'var(--' + sig.u.id + ')' } },
     el('div', { cls: 'rotulo-eyebrow', estilo: { color: 'var(--u)' }, txt: 'Seguí acá' }),
     el('h1', { txt: sig.l.titulo }),
-    el('p', { txt: 'Unidad ' + sig.u.n + ' · ' + sig.u.titulo + ' · ' + dom + ' % del curso' })));
+    el('p', { txt: 'Unidad ' + sig.u.n + ' · ' + sig.u.titulo + ' · ' + dom + ' % del curso' }),
+    Store.est.libre ? el('p', { estilo: { marginTop: '8px' } },
+      el('span', { cls: 'cinta ok', txt: '\u2713 Modo exploración: todo abierto' })) : null));
 
   v.appendChild(el('button', {
     cls: 'btn btn-primario btn-ancho', type: 'button',
@@ -5468,6 +5504,27 @@ function pantallaProgreso(v) {
     el('div', { cls: 'loza' },
       el('div', { cls: 'cifra', txt: dom + '%' }),
       el('div', { cls: 'leyenda', txt: 'Curso cubierto' }))));
+
+  /* --- modo exploración --- */
+  const perilla = el('button', {
+    cls: 'perilla', type: 'button', role: 'switch',
+    'aria-checked': Store.est.libre ? 'true' : 'false',
+    'aria-label': 'Modo exploración',
+  });
+  perilla.addEventListener('click', () => {
+    Store.est.libre = !Store.est.libre;
+    Store.guardar();
+    brindis(Store.est.libre ? 'Todas las lecciones abiertas' : 'Se abren de a una otra vez');
+    dibujar();
+  });
+  v.appendChild(el('div', { cls: 'tarjeta' },
+    el('div', { cls: 'fila-conf' },
+      el('div', { cls: 'txt' },
+        el('strong', { txt: 'Modo exploración' }),
+        el('span', { txt: Store.est.libre
+          ? 'Todas las lecciones están abiertas: podés entrar a cualquiera y mirar la teoría cuando quieras. Apagalo si preferís que se abran de a una, como Duolingo.'
+          : 'Las lecciones se abren de a una, a medida que terminás la anterior. Prendelo para poder entrar a cualquiera y hojear todo.' })),
+      perilla)));
 
   /* --- rango --- */
   const tarjRango = el('div', { cls: 'tarjeta', estilo: { '--u': 'var(--u3)' } },

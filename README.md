@@ -84,6 +84,17 @@ Tipos disponibles: `mc` (una correcta), `multi` (varias), `vf` (verdadero o fals
 `in` (escribir), `ord` (ordenar pasos), `par` (emparejar) y `hue` (completar huecos).
 La matemática se escribe entre `$…$` y se tipografía con KaTeX.
 
+## Modo exploración
+
+Viene activado: todas las lecciones están abiertas desde el arranque, así se puede
+hojear la materia entera y leer cualquier teoría sin tener que ir en orden. Se apaga
+con el interruptor de la pantalla **Progreso** y ahí las lecciones vuelven a abrirse
+de a una, a medida que se termina la anterior.
+
+La preferencia se guarda con el resto del progreso. Al fundir dos estados no se
+"maximiza" como los contadores: gana la del estado más reciente, porque es una
+elección del alumno y no un avance.
+
 ## Progreso
 
 Se guarda siempre en `localStorage` y, cuando el visor lo permite, además en el

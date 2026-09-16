@@ -24,6 +24,7 @@ function estadoNuevo() {
     respuestas: 0,
     segundos: 0,
     meta: 30,          // XP por día
+    libre: true,       // modo exploración: todas las lecciones abiertas
   };
 }
 
@@ -39,6 +40,9 @@ function fundir(a, b) {
   r.respuestas = max('respuestas');
   r.segundos = max('segundos');
   r.meta = (a.actualizado > b.actualizado ? a.meta : b.meta) || 30;
+  // Una preferencia no se "maximiza": gana la del estado más reciente.
+  const reciente = (a.actualizado || 0) >= (b.actualizado || 0) ? a : b;
+  r.libre = reciente.libre !== false;
 
   r.dias = Object.assign({}, a.dias);
   for (const d in (b.dias || {})) r.dias[d] = Math.max(r.dias[d] || 0, b.dias[d]);

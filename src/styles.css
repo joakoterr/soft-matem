@@ -847,6 +847,32 @@ table.datos td.f { color: var(--rojo); font-weight: 700; }
 .medalla .nom { font-size: var(--t-xs); font-weight: 700; margin-top: 4px; line-height: 1.3; }
 .medalla .desc { font-size: 10px; color: var(--tinta-3); line-height: 1.35; margin-top: 2px; }
 
+/* ---------- interruptor de preferencias ---------- */
+
+.fila-conf { display: flex; align-items: flex-start; gap: 14px; }
+.fila-conf .txt { flex: 1; min-width: 0; }
+.fila-conf .txt strong { display: block; font-size: var(--t-md); }
+.fila-conf .txt span { display: block; font-size: var(--t-xs); color: var(--tinta-2); line-height: 1.45; margin-top: 2px; }
+
+.perilla {
+  appearance: none; border: 0; cursor: pointer; flex: none;
+  width: 48px; height: 28px; border-radius: 999px;
+  background: var(--borde-2);
+  position: relative;
+  transition: background .18s;
+  margin-top: 2px;
+}
+.perilla::after {
+  content: '';
+  position: absolute; top: 3px; left: 3px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .32);
+  transition: transform .18s;
+}
+.perilla[aria-checked="true"] { background: var(--correcto); }
+.perilla[aria-checked="true"]::after { transform: translateX(20px); }
+
 /* ============================================================
    Fórmulas
    ============================================================ */

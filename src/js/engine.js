@@ -54,8 +54,12 @@ const Juego = {
     return this.abierta(id) ? 'abierto' : 'cerrado';
   },
 
-  /** Se abre la primera lección del curso y la siguiente a cada una ya hecha. */
+  /**
+   * En modo exploración está todo abierto. Si no, se abre la primera
+   * lección del curso y la siguiente a cada una ya hecha.
+   */
   abierta(id) {
+    if (Store.est.libre) return true;
     const todas = this.lecciones();
     const i = todas.findIndex((x) => x.l.id === id);
     if (i <= 0) return i === 0;

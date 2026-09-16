@@ -107,6 +107,27 @@ function pantallaProgreso(v) {
       el('div', { cls: 'cifra', txt: dom + '%' }),
       el('div', { cls: 'leyenda', txt: 'Curso cubierto' }))));
 
+  /* --- modo exploración --- */
+  const perilla = el('button', {
+    cls: 'perilla', type: 'button', role: 'switch',
+    'aria-checked': Store.est.libre ? 'true' : 'false',
+    'aria-label': 'Modo exploración',
+  });
+  perilla.addEventListener('click', () => {
+    Store.est.libre = !Store.est.libre;
+    Store.guardar();
+    brindis(Store.est.libre ? 'Todas las lecciones abiertas' : 'Se abren de a una otra vez');
+    dibujar();
+  });
+  v.appendChild(el('div', { cls: 'tarjeta' },
+    el('div', { cls: 'fila-conf' },
+      el('div', { cls: 'txt' },
+        el('strong', { txt: 'Modo exploración' }),
+        el('span', { txt: Store.est.libre
+          ? 'Todas las lecciones están abiertas: podés entrar a cualquiera y mirar la teoría cuando quieras. Apagalo si preferís que se abran de a una, como Duolingo.'
+          : 'Las lecciones se abren de a una, a medida que terminás la anterior. Prendelo para poder entrar a cualquiera y hojear todo.' })),
+      perilla)));
+
   /* --- rango --- */
   const tarjRango = el('div', { cls: 'tarjeta', estilo: { '--u': 'var(--u3)' } },
     el('div', { cls: 'dominio-nombre', estilo: { marginBottom: '8px' } },
