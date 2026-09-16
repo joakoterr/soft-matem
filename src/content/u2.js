@@ -91,6 +91,10 @@
           ['$\\log_a b^{m}=m\\cdot\\log_a b$', 'Bajar un exponente'],
           ['$\\log_a(b\\cdot c)=\\log_a b+\\log_a c$', 'Juntar o separar logaritmos'],
           ['$\\log_a\\left(\\frac{b}{c}\\right)=\\log_a b-\\log_a c$', 'Idem con cocientes'],
+          ['$\\log_a a=1$ y $\\log_a 1=0$', 'Valores que aparecen siempre'],
+          ['$\\log_a b=\\dfrac{\\log b}{\\log a}$', 'Cambio de base'],
+          ['$a^{-m}=\\left(\\frac{1}{a}\\right)^{m}$', 'Exponente negativo'],
+          ['$a^{m/n}=\\sqrt[n]{a^{m}}$', 'Exponente fraccionario'],
         ]] },
         { ej: ['Terminar $\\ln|y|=-\\dfrac{1}{2}x^{2}+C$', [
           'Aplico exponencial a los dos lados: $\;e^{\\ln|y|}=e^{-\\frac{1}{2}x^{2}+C}$',

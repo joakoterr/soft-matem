@@ -9,7 +9,8 @@ racha diaria, XP y repaso espaciado.
 
 El contenido cubre el cuadernillo **hasta la página 20**, que es lo que se dictó
 hasta el 10/09/2026, y está armado a partir de las fotos del pizarrón de las siete
-clases más la Guía Teórica y las Prácticas del cuadernillo.
+clases, la Guía Teórica y las Prácticas del cuadernillo, y el machete de
+fórmulas de la cátedra.
 
 ## Contenido
 
@@ -21,11 +22,11 @@ clases más la Guía Teórica y las Prácticas del cuadernillo.
 | 3 | Lineales con factor de integración y Bernoulli | 4 |
 | 4 | Homogéneas con la sustitución `y = u·x` | 3 |
 | 5 | Segundo orden: ecuación característica y los tres casos | 4 |
-| 6 | Transformada de Laplace: tabla, derivadas, inversa, EDO | 5 |
+| 6 | Transformada de Laplace: tabla, derivadas, inversa, traslación, EDO | 6 |
 | 7 | Series de Fourier: coeficientes, pares e impares | 4 |
-| 8 | Complejos y funciones de variable compleja: límites | 5 |
+| 8 | Complejos, variable compleja, límites, Euler y logaritmo | 6 |
 
-**37 lecciones · 368 ejercicios · 128 fórmulas de referencia.**
+**39 lecciones · 389 ejercicios · 140 fórmulas de referencia.**
 
 Los ejemplos resueltos son los mismos que la profesora desarrolló en el pizarrón,
 así que lo que se practica acá es exactamente lo que se pide en el parcial.
