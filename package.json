@@ -1,0 +1,10 @@
+{
+  "name": "soft-matem",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Matemática desde cero para carreras de software, en formato de juego.",
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build.mjs"
+  }
+}
