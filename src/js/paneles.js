@@ -237,8 +237,13 @@ let profeOcupado = false;
  * Claude: así aparece al instante en el Artifact, sin esperar la sonda.
  * Publicada como sitio estático no existe, y la solapa no se muestra.
  */
-function hayProfe() {
-  return sampleNs ? true : !!(window.claude && window.claude.use);
+function hayProfe() { return true; }
+
+/** ¿Por dónde va a responder el profe? */
+function viaProfe() {
+  if (sampleNs) return 'sample';
+  if (window.claude && window.claude.use && sampleNs === undefined) return 'sample';
+  return leerClave() ? 'api' : 'sin-clave';
 }
 
 /**
@@ -285,6 +290,11 @@ function pantallaProfe(v) {
   v.appendChild(el('h1', { cls: 'titulo-pantalla', txt: 'Profe' }));
   v.appendChild(el('p', { cls: 'bajada', txt: 'Preguntale lo que no entendiste. Conoce el programa de la materia y hasta dónde llegaron.' }));
 
+  if (viaProfe() === 'sin-clave') {
+    v.appendChild(panelClave(() => dibujar()));
+    return;
+  }
+
   const hilo = el('div', { cls: 'chat', id: 'hilo' });
   v.appendChild(hilo);
   pintarHilo(hilo);
@@ -315,12 +325,28 @@ function pantallaProfe(v) {
       on: { click: () => preguntar(caja.value) },
     })));
 
+  const pie = el('div', { estilo: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' } });
   if (CHAT.length) {
-    v.appendChild(el('button', {
-      cls: 'btn btn-fantasma btn-chico', type: 'button', estilo: { marginTop: '12px' }, txt: 'Empezar de nuevo',
+    pie.appendChild(el('button', {
+      cls: 'btn btn-fantasma btn-chico', type: 'button', txt: 'Empezar de nuevo',
       on: { click: () => { CHAT.length = 0; dibujar(); } },
     }));
   }
+  if (viaProfe() === 'api') {
+    pie.appendChild(el('button', {
+      cls: 'btn btn-fantasma btn-chico', type: 'button', txt: 'Cambiar clave',
+      on: {
+        click: () => {
+          if (window.confirm('¿Borrar la clave guardada en este navegador?')) {
+            guardarClave('');
+            CHAT.length = 0;
+            dibujar();
+          }
+        },
+      },
+    }));
+  }
+  if (pie.children.length) v.appendChild(pie);
 }
 
 function pintarHilo(hilo) {
@@ -349,6 +375,28 @@ function refrescarHilo() {
   if (hilo) { pintarHilo(hilo); hilo.lastChild.scrollIntoView({ block: 'nearest' }); }
 }
 
+/** Traduce el error de la API a algo que se entienda. */
+function explicarError(err) {
+  const code = (err && err.code) || '';
+  if (code === 'authentication_error' || err.status === 401) {
+    return 'La clave no es válida o fue revocada. Cargala de nuevo desde **Cambiar clave**.';
+  }
+  if (code === 'permission_error' || err.status === 403) {
+    return 'Esa clave no tiene permiso para usar este modelo. Probá con otro modelo o revisá la cuenta.';
+  }
+  if (code === 'rate_limit_error' || code === 'rate_limited' || err.status === 429) {
+    return 'Llegaste al límite de consultas por minuto. Esperá un toque y probá de nuevo.';
+  }
+  if (code === 'invalid_request_error' && /credit|balance/i.test(err.message || '')) {
+    return 'La cuenta se quedó sin crédito. Cargá saldo en console.anthropic.com y seguimos.';
+  }
+  if (code === 'not_granted') return 'Hace falta que permitas la consulta para que pueda responderte.';
+  if (code === 'refusal') return 'El modelo prefirió no responder esa consulta. Probá reformulándola.';
+  if (code === 'overloaded_error' || err.status === 529) return 'El servicio está saturado ahora mismo. Probá en un minuto.';
+  if (err && err.message) return 'No salió: ' + err.message;
+  return 'Se cortó la respuesta. Probá de nuevo.';
+}
+
 async function preguntar(texto) {
   const q = String(texto || '').trim();
   if (!q || profeOcupado) return;
@@ -359,8 +407,8 @@ async function preguntar(texto) {
   const caja = $('#pregunta');
   if (caja) { caja.value = ''; caja.style.height = 'auto'; }
 
-  if (!sampleNs) {
-    CHAT.push({ rol: 'profe', texto: 'No puedo responder desde acá: el profe con IA sólo funciona en la versión publicada de la página, y hay que darle permiso la primera vez. Mientras tanto tenés toda la teoría en cada lección y el machete completo en **Fórmulas**.' });
+  if (!sampleNs && !leerClave()) {
+    CHAT.pop();
     dibujar();
     return;
   }
@@ -375,21 +423,30 @@ async function preguntar(texto) {
     content: (i === 0 ? PREAMBULO + '\n\n---\n\n' : '') + m.texto,
   }));
 
+  const irLlegando = (texto) => { burbuja.texto = texto; burbuja.pensando = false; refrescarHilo(); };
+
   try {
-    const res = await sampleNs(turnos, {
-      modelTier: 'default',
-      onText: ({ text }) => { burbuja.texto = text; burbuja.pensando = false; refrescarHilo(); },
-    });
-    burbuja.texto = (res && res.text) || burbuja.texto || 'No me salió la respuesta. Probá de nuevo.';
+    if (sampleNs) {
+      const res = await sampleNs(turnos, {
+        modelTier: 'default',
+        onText: ({ text }) => irLlegando(text),
+      });
+      burbuja.texto = (res && res.text) || burbuja.texto || 'No me salió la respuesta. Probá de nuevo.';
+    } else {
+      // El primer turno lleva el preámbulo pegado; acá va aparte como system.
+      const limpios = turnos.map((t, i) => (i === 0
+        ? { role: t.role, content: t.content.split('\n\n---\n\n').slice(1).join('\n\n---\n\n') || t.content }
+        : t));
+      burbuja.texto = await llamarClaude({
+        sistema: PREAMBULO,
+        turnos: limpios,
+        onText: irLlegando,
+      });
+    }
     burbuja.pensando = false;
   } catch (err) {
     burbuja.pensando = false;
-    const code = err && err.code;
-    burbuja.texto = code === 'rate_limited'
-      ? 'Frenemos un toque: llegaste al límite de consultas. Probá en unos minutos.'
-      : (code === 'not_granted'
-        ? 'Hace falta que permitas la consulta para que pueda responderte.'
-        : 'Se cortó la respuesta. Probá de nuevo.');
+    burbuja.texto = (err && err.text ? err.text + '\n\n' : '') + explicarError(err);
   }
   profeOcupado = false;
   dibujar();

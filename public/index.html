@@ -5413,6 +5413,169 @@ function pantallaPractica(v) {
 
 ;
 /* ===========================================================
+   profe-api.js — el profe con IA usando la clave de quien usa
+   la página. Sólo hace falta cuando la app corre fuera de
+   claude.ai; adentro se usa la capacidad `sample`.
+
+   La clave queda en el navegador de cada persona y viaja
+   únicamente a api.anthropic.com.
+   =========================================================== */
+
+const API_URL = 'https://api.anthropic.com/v1/messages';
+const CLAVE_LS = 'cuaderno-de-mate/clave';
+const MODELO_LS = 'cuaderno-de-mate/modelo';
+const TOPE_RESPUESTA = 2000;
+
+const MODELOS = [
+  { id: 'claude-opus-5', nom: 'Opus 5', desc: 'El más capaz. Recomendado para que no se equivoque en las cuentas.' },
+  { id: 'claude-sonnet-5', nom: 'Sonnet 5', desc: 'Intermedio, bastante más barato.' },
+  { id: 'claude-haiku-4-5', nom: 'Haiku 4.5', desc: 'El más económico y rápido.' },
+];
+
+function leerLS(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+function escribirLS(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) { /* modo privado */ } }
+
+function leerClave() { return leerLS(CLAVE_LS); }
+function guardarClave(v) { escribirLS(CLAVE_LS, v.trim()); }
+function leerModelo() { return leerLS(MODELO_LS) || MODELOS[0].id; }
+
+/**
+ * Pide una respuesta a Claude y la va entregando a medida que llega.
+ * @param {{turnos: object[], sistema: string, onText: function}} op
+ * @returns {Promise<string>} la respuesta completa
+ */
+async function llamarClaude(op) {
+  const clave = leerClave();
+  if (!clave) throw { code: 'sin_clave', message: 'Falta cargar la clave.' };
+
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': clave,
+      'anthropic-version': '2023-06-01',
+      // Sin este header la API rechaza el pedido hecho desde un navegador.
+      'anthropic-dangerous-direct-browser-access': 'true',
+      'anthropic-beta': 'server-side-fallback-2026-07-01',
+    },
+    body: JSON.stringify({
+      model: leerModelo(),
+      max_tokens: TOPE_RESPUESTA,
+      stream: true,
+      fallbacks: 'default',
+      system: op.sistema,
+      messages: op.turnos,
+    }),
+  });
+
+  if (!res.ok) {
+    let tipo = String(res.status);
+    let msg = 'La API respondió ' + res.status + '.';
+    try {
+      const j = await res.json();
+      if (j && j.error) { tipo = j.error.type || tipo; msg = j.error.message || msg; }
+    } catch (e) { /* respuesta sin json */ }
+    throw { code: tipo, message: msg, status: res.status };
+  }
+
+  const lector = res.body.getReader();
+  const dec = new TextDecoder();
+  let pendiente = '';
+  let texto = '';
+
+  for (;;) {
+    const { done, value } = await lector.read();
+    if (done) break;
+    pendiente += dec.decode(value, { stream: true });
+    const bloques = pendiente.split('\n\n');
+    pendiente = bloques.pop();
+
+    for (const bloque of bloques) {
+      const linea = bloque.split('\n').find((l) => l.indexOf('data:') === 0);
+      if (!linea) continue;
+      let ev;
+      try { ev = JSON.parse(linea.slice(5).trim()); } catch (e) { continue; }
+
+      if (ev.type === 'content_block_delta' && ev.delta && ev.delta.type === 'text_delta') {
+        texto += ev.delta.text;
+        if (op.onText) op.onText(texto);
+      } else if (ev.type === 'error') {
+        throw { code: (ev.error && ev.error.type) || 'error', message: (ev.error && ev.error.message) || 'Se cortó la respuesta.', text: texto };
+      } else if (ev.type === 'message_delta' && ev.delta && ev.delta.stop_reason === 'refusal') {
+        throw { code: 'refusal', message: 'El modelo declinó responder esta consulta.', text: texto };
+      }
+    }
+  }
+  return texto;
+}
+
+/* -----------------------------------------------------------
+   Pantalla para cargar la clave
+   ----------------------------------------------------------- */
+
+function panelClave(alGuardar) {
+  const campo = el('input', {
+    cls: 'campo', type: 'password', id: 'clave-api',
+    placeholder: 'sk-ant-...', autocomplete: 'off', spellcheck: 'false',
+    estilo: { textAlign: 'left', fontSize: 'var(--t-md)' },
+  });
+
+  const elegido = leerModelo();
+  const selector = el('div', { cls: 'opciones', estilo: { marginTop: '10px' } },
+    MODELOS.map((m) => {
+      const b = el('button', {
+        cls: 'opcion', type: 'button', 'aria-pressed': String(m.id === elegido), 'data-m': m.id,
+        on: {
+          click: () => {
+            escribirLS(MODELO_LS, m.id);
+            $$('.opcion', selector).forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.m === m.id)));
+          },
+        },
+      },
+        el('span', { cls: 'cont' },
+          el('strong', { txt: m.nom }),
+          el('span', { estilo: { display: 'block', fontSize: 'var(--t-xs)', color: 'var(--tinta-2)' }, txt: m.desc })));
+      return b;
+    }));
+
+  function guardar() {
+    const v = campo.value.trim();
+    if (!v) { brindis('Pegá la clave primero'); campo.focus(); return; }
+    if (v.indexOf('sk-ant-') !== 0) { brindis('Esa no parece una clave de Anthropic'); return; }
+    guardarClave(v);
+    brindis('Listo, ya podés preguntar');
+    if (alGuardar) alGuardar();
+  }
+
+  return el('div', {},
+    el('div', { cls: 'tarjeta' },
+      el('h3', { estilo: { fontSize: 'var(--t-lg)', marginBottom: '8px' }, txt: 'Activá el profe con tu clave' }),
+      el('p', { estilo: { fontSize: 'var(--t-sm)', color: 'var(--tinta-2)', lineHeight: '1.6' },
+        html: tx('El profe responde con **Claude**. Para que funcione en esta página hace falta una clave de la API de Anthropic. **Cada persona usa la suya** y paga solamente lo que consume.') }),
+      el('ol', { cls: 'pasos', estilo: { marginTop: '14px' } },
+        el('li', {}, el('div', { html: tx('Entrá a <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com</a> y creá una clave.') })),
+        el('li', {}, el('div', { html: tx('Conviene ponerle un **límite de gasto** desde la consola, por las dudas.') })),
+        el('li', {}, el('div', { html: tx('Pegala acá abajo. Queda guardada en **este navegador** nada más.') }))),
+      el('div', { estilo: { marginTop: '14px' } }, campo),
+      el('p', { cls: 'ayuda-campo', estilo: { textAlign: 'left' },
+        txt: 'Se guarda en tu navegador y viaja únicamente a api.anthropic.com. No pasa por ningún otro servidor.' }),
+      el('button', {
+        cls: 'btn btn-primario btn-ancho', type: 'button', txt: 'Guardar y empezar',
+        estilo: { marginTop: '12px' },
+        on: { click: guardar },
+      })),
+
+    el('div', { cls: 'tarjeta' },
+      el('h3', { estilo: { fontSize: 'var(--t-md)', marginBottom: '8px' }, txt: 'Qué modelo usar' }),
+      selector),
+
+    el('div', { cls: 'bloque ojo', estilo: { marginTop: '12px' } },
+      el('div', { cls: 'bloque-titulo', txt: 'Ojo con esto' }),
+      el('div', { html: tx('No cargues tu clave en una computadora compartida: cualquiera con acceso a ese navegador podría leerla. Y si sos quien publicó la página, **no pongas tu propia clave en el código** para que la use todo el mundo: te la pueden sacar y gastar.') })));
+}
+
+;
+/* ===========================================================
    paneles.js — Fórmulas, Progreso y Profe
    =========================================================== */
 
@@ -5651,8 +5814,13 @@ let profeOcupado = false;
  * Claude: así aparece al instante en el Artifact, sin esperar la sonda.
  * Publicada como sitio estático no existe, y la solapa no se muestra.
  */
-function hayProfe() {
-  return sampleNs ? true : !!(window.claude && window.claude.use);
+function hayProfe() { return true; }
+
+/** ¿Por dónde va a responder el profe? */
+function viaProfe() {
+  if (sampleNs) return 'sample';
+  if (window.claude && window.claude.use && sampleNs === undefined) return 'sample';
+  return leerClave() ? 'api' : 'sin-clave';
 }
 
 /**
@@ -5699,6 +5867,11 @@ function pantallaProfe(v) {
   v.appendChild(el('h1', { cls: 'titulo-pantalla', txt: 'Profe' }));
   v.appendChild(el('p', { cls: 'bajada', txt: 'Preguntale lo que no entendiste. Conoce el programa de la materia y hasta dónde llegaron.' }));
 
+  if (viaProfe() === 'sin-clave') {
+    v.appendChild(panelClave(() => dibujar()));
+    return;
+  }
+
   const hilo = el('div', { cls: 'chat', id: 'hilo' });
   v.appendChild(hilo);
   pintarHilo(hilo);
@@ -5729,12 +5902,28 @@ function pantallaProfe(v) {
       on: { click: () => preguntar(caja.value) },
     })));
 
+  const pie = el('div', { estilo: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' } });
   if (CHAT.length) {
-    v.appendChild(el('button', {
-      cls: 'btn btn-fantasma btn-chico', type: 'button', estilo: { marginTop: '12px' }, txt: 'Empezar de nuevo',
+    pie.appendChild(el('button', {
+      cls: 'btn btn-fantasma btn-chico', type: 'button', txt: 'Empezar de nuevo',
       on: { click: () => { CHAT.length = 0; dibujar(); } },
     }));
   }
+  if (viaProfe() === 'api') {
+    pie.appendChild(el('button', {
+      cls: 'btn btn-fantasma btn-chico', type: 'button', txt: 'Cambiar clave',
+      on: {
+        click: () => {
+          if (window.confirm('¿Borrar la clave guardada en este navegador?')) {
+            guardarClave('');
+            CHAT.length = 0;
+            dibujar();
+          }
+        },
+      },
+    }));
+  }
+  if (pie.children.length) v.appendChild(pie);
 }
 
 function pintarHilo(hilo) {
@@ -5763,6 +5952,28 @@ function refrescarHilo() {
   if (hilo) { pintarHilo(hilo); hilo.lastChild.scrollIntoView({ block: 'nearest' }); }
 }
 
+/** Traduce el error de la API a algo que se entienda. */
+function explicarError(err) {
+  const code = (err && err.code) || '';
+  if (code === 'authentication_error' || err.status === 401) {
+    return 'La clave no es válida o fue revocada. Cargala de nuevo desde **Cambiar clave**.';
+  }
+  if (code === 'permission_error' || err.status === 403) {
+    return 'Esa clave no tiene permiso para usar este modelo. Probá con otro modelo o revisá la cuenta.';
+  }
+  if (code === 'rate_limit_error' || code === 'rate_limited' || err.status === 429) {
+    return 'Llegaste al límite de consultas por minuto. Esperá un toque y probá de nuevo.';
+  }
+  if (code === 'invalid_request_error' && /credit|balance/i.test(err.message || '')) {
+    return 'La cuenta se quedó sin crédito. Cargá saldo en console.anthropic.com y seguimos.';
+  }
+  if (code === 'not_granted') return 'Hace falta que permitas la consulta para que pueda responderte.';
+  if (code === 'refusal') return 'El modelo prefirió no responder esa consulta. Probá reformulándola.';
+  if (code === 'overloaded_error' || err.status === 529) return 'El servicio está saturado ahora mismo. Probá en un minuto.';
+  if (err && err.message) return 'No salió: ' + err.message;
+  return 'Se cortó la respuesta. Probá de nuevo.';
+}
+
 async function preguntar(texto) {
   const q = String(texto || '').trim();
   if (!q || profeOcupado) return;
@@ -5773,8 +5984,8 @@ async function preguntar(texto) {
   const caja = $('#pregunta');
   if (caja) { caja.value = ''; caja.style.height = 'auto'; }
 
-  if (!sampleNs) {
-    CHAT.push({ rol: 'profe', texto: 'No puedo responder desde acá: el profe con IA sólo funciona en la versión publicada de la página, y hay que darle permiso la primera vez. Mientras tanto tenés toda la teoría en cada lección y el machete completo en **Fórmulas**.' });
+  if (!sampleNs && !leerClave()) {
+    CHAT.pop();
     dibujar();
     return;
   }
@@ -5789,21 +6000,30 @@ async function preguntar(texto) {
     content: (i === 0 ? PREAMBULO + '\n\n---\n\n' : '') + m.texto,
   }));
 
+  const irLlegando = (texto) => { burbuja.texto = texto; burbuja.pensando = false; refrescarHilo(); };
+
   try {
-    const res = await sampleNs(turnos, {
-      modelTier: 'default',
-      onText: ({ text }) => { burbuja.texto = text; burbuja.pensando = false; refrescarHilo(); },
-    });
-    burbuja.texto = (res && res.text) || burbuja.texto || 'No me salió la respuesta. Probá de nuevo.';
+    if (sampleNs) {
+      const res = await sampleNs(turnos, {
+        modelTier: 'default',
+        onText: ({ text }) => irLlegando(text),
+      });
+      burbuja.texto = (res && res.text) || burbuja.texto || 'No me salió la respuesta. Probá de nuevo.';
+    } else {
+      // El primer turno lleva el preámbulo pegado; acá va aparte como system.
+      const limpios = turnos.map((t, i) => (i === 0
+        ? { role: t.role, content: t.content.split('\n\n---\n\n').slice(1).join('\n\n---\n\n') || t.content }
+        : t));
+      burbuja.texto = await llamarClaude({
+        sistema: PREAMBULO,
+        turnos: limpios,
+        onText: irLlegando,
+      });
+    }
     burbuja.pensando = false;
   } catch (err) {
     burbuja.pensando = false;
-    const code = err && err.code;
-    burbuja.texto = code === 'rate_limited'
-      ? 'Frenemos un toque: llegaste al límite de consultas. Probá en unos minutos.'
-      : (code === 'not_granted'
-        ? 'Hace falta que permitas la consulta para que pueda responderte.'
-        : 'Se cortó la respuesta. Probá de nuevo.');
+    burbuja.texto = (err && err.text ? err.text + '\n\n' : '') + explicarError(err);
   }
   profeOcupado = false;
   dibujar();
