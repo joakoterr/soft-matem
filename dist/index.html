@@ -5531,7 +5531,15 @@ function panelClave(alGuardar) {
       el('p', { estilo: { fontSize: 'var(--t-sm)', color: 'var(--tinta-2)', lineHeight: '1.6' },
         html: tx('El profe responde con **Claude**. Para que funcione en esta página hace falta una clave de la API de Anthropic. **Cada persona usa la suya** y paga solamente lo que consume.') }),
       el('ol', { cls: 'pasos', estilo: { marginTop: '14px' } },
-        el('li', {}, el('div', { html: tx('Entrá a <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">console.anthropic.com</a> y creá una clave.') })),
+        el('li', {}, el('div', {},
+          // tx() escapa el HTML, así que el enlace se arma como nodo.
+          el('span', { txt: 'Entrá a ' }),
+          el('a', {
+            href: 'https://console.anthropic.com/settings/keys',
+            target: '_blank', rel: 'noopener noreferrer',
+            txt: 'console.anthropic.com',
+          }),
+          el('span', { txt: ' y creá tu clave.' }))),
         el('li', {}, el('div', { html: tx('Conviene ponerle un **límite de gasto** desde la consola, por las dudas.') })),
         el('li', {}, el('div', { html: tx('Pegala acá abajo. Queda guardada en **este navegador** nada más.') }))),
       el('div', { estilo: { marginTop: '14px' } }, campo),
