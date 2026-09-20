@@ -1014,6 +1014,66 @@ hr.regla { border: 0; border-top: 1px solid var(--borde); margin-block: 20px; }
 
 .katex-display { margin: .7em 0; overflow-x: auto; overflow-y: hidden; padding-bottom: 2px; }
 .katex { font-size: 1.04em; }
+
+/* ============================================================
+   Plan de estudio
+   ============================================================ */
+
+.plan-fase { display: flex; align-items: center; gap: 11px; margin: 22px 0 10px; }
+.plan-fase-linea { width: 4px; align-self: stretch; min-height: 34px; border-radius: 999px; background: var(--u); flex: none; }
+
+.plan-dia {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--papel-2);
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--u);
+  border-radius: var(--r-md);
+  padding: 13px 14px;
+}
+.plan-dia + .plan-dia { margin-top: 9px; }
+.plan-dia.hoy { border-color: var(--lapicera); box-shadow: 0 0 0 3px var(--anillo); }
+.plan-dia.hecho { opacity: .62; }
+.plan-dia.hecho .plan-tit { text-decoration: line-through; text-decoration-thickness: 2px; }
+
+.plan-tilde {
+  appearance: none; cursor: pointer; flex: none;
+  width: 26px; height: 26px; margin-top: 1px;
+  border: 2px solid var(--borde-2); border-radius: 8px;
+  background: var(--papel-2); color: #fff;
+  display: grid; place-items: center; padding: 0;
+  transition: background .15s, border-color .15s;
+}
+.plan-tilde svg { width: 17px; height: 17px; stroke-width: 3; }
+.plan-tilde[aria-checked="true"] { background: var(--correcto); border-color: var(--correcto); }
+:root[data-theme="dark"] .plan-tilde[aria-checked="true"] { color: #0C1512; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .plan-tilde[aria-checked="true"] { color: #0C1512; } }
+
+.plan-cab { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+.plan-num { font-family: var(--display); font-weight: 800; font-size: var(--t-xs); letter-spacing: .07em; text-transform: uppercase; color: var(--u); }
+.plan-fecha { font-size: var(--t-xs); color: var(--tinta-3); font-variant-numeric: tabular-nums; }
+.plan-tit { font-family: var(--display); font-weight: 800; font-size: var(--t-md); line-height: 1.3; }
+.plan-nota { font-size: var(--t-xs); color: var(--tinta-2); line-height: 1.55; margin-top: 5px; }
+
+.plan-lecciones { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.lec-chip {
+  appearance: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--u) 40%, var(--borde));
+  background: color-mix(in srgb, var(--u) 9%, var(--papel-2));
+  color: var(--tinta);
+  border-radius: 999px; padding: 5px 11px 5px 6px;
+  font-size: var(--t-xs); font-weight: 600; text-align: left;
+}
+.lec-chip:hover { border-color: var(--u); }
+.lec-chip.lista { opacity: .6; }
+.lec-glifo {
+  width: 19px; height: 19px; flex: none; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--u); color: #fff;
+  font-family: var(--display); font-weight: 800; font-size: 11px;
+}
+:root[data-theme="dark"] .lec-glifo { color: #101A16; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lec-glifo { color: #101A16; } }
 </style>
 
 <div class="app" id="app">
@@ -3619,6 +3679,23 @@ hr.regla { border: 0; border-top: 1px solid var(--borde); margin-block: 20px; }
           'Dan distinto ($1\\neq 0$), así que **el límite no existe**',
         ]] },
         { truco: 'Si el enunciado dice "demostrar que no existe el límite", el camino es siempre este: dos direcciones, dos resultados distintos, listo.' },
+        { p: 'Y no hay sólo dos caminos. En el pizarrón la profe anotó la lista completa de trayectorias que conviene probar:' },
+        { lista: [
+          'El **eje $x$**: hacer $y=0$',
+          'El **eje $y$**: hacer $x=0$',
+          'Una **recta** cualquiera: $y=mx$',
+          'La recta $y=x$',
+          'La **parábola** $y=x^{2}$',
+          'Una vertical: $x=1$',
+        ] },
+        { ej: ['Probar que no existe $\lim_{z\to 1}\dfrac{x+y-1}{z-1}$  — del pizarrón', [
+          'Escribo $z-1=(x-1)+iy$',
+          '**Por el eje $x$** ($y=0$): $\;\dfrac{x-1}{x-1}=1$',
+          '**Por la vertical $x=1$**: $\;\dfrac{1+y-1}{0+iy}=\dfrac{y}{iy}=\dfrac{1}{i}$',
+          'Racionalizo: $\;\dfrac{1}{i}\cdot\dfrac{-i}{-i}=\dfrac{-i}{-i^{2}}=\dfrac{-i}{1}=-i$',
+          'Dan distinto ($1\neq -i$): **no existe el límite**',
+        ]] },
+        { truco: 'Acordate de $\dfrac{1}{i}=-i$. Sale multiplicando arriba y abajo por $-i$, y aparece seguido en estos ejercicios.' },
         { h: 'Límites que sí existen' },
         { p: 'Si la función es continua en $z_0$ (por ejemplo un polinomio), el límite se calcula **reemplazando directamente**.' },
         { ej: ['$\\lim_{z\\to i}\\left(4z^{3}-5z^{2}+4z+1-5i\\right)$', [
@@ -3670,6 +3747,11 @@ hr.regla { border: 0; border-top: 1px solid var(--borde); margin-block: 20px; }
         { t: 'mc', p: '¿Cuál de estas NO es una indeterminación?', fijo: true,
           o: ['$\\dfrac{1}{0}$', '$\\dfrac{0}{0}$', '$\\dfrac{\\infty}{\\infty}$', '$1^{\\infty}$'], r: 0,
           x: '$\\frac{1}{0}$ tiende a infinito: no es indeterminado, está determinado. Las otras tres sí lo son.' },
+        { t: 'mc', p: 'Además de los ejes, ¿qué otras trayectorias conviene probar?',
+          o: ['Rectas $y=mx$, la parábola $y=x^{2}$, verticales como $x=1$', 'Sólo los ejes', 'Sólo circunferencias', 'Ninguna, con los ejes alcanza siempre'], r: 0,
+          x: 'Es la lista del pizarrón. Si por los ejes da igual, todavía no probaste nada: hay que buscar otro camino.' },
+        { t: 'in', p: '¿Cuánto vale $\\dfrac{1}{i}$?', r: ['-i', '-1i'], ph: 'Por ejemplo: -i', teclas: ['-', 'i'],
+          x: 'Multiplicás arriba y abajo por $-i$: $\\frac{-i}{-i^{2}}=\\frac{-i}{1}=-i$.' },
         { t: 'ord', p: 'Ordená el método para probar que un límite no existe',
           o: ['Escribir $z=x+iy$ en la función', 'Calcular el límite por el eje $x$ (con $y=0$)', 'Calcular el límite por el eje $y$ (con $x=0$)', 'Comparar: si dan distinto, el límite no existe'],
           x: 'Si dieran iguales, no probaste nada: podría existir o no. Para probar que **sí** existe hace falta otro argumento.' },
@@ -3746,6 +3828,177 @@ hr.regla { border: 0; border-top: 1px solid var(--borde); margin-block: 20px; }
         { t: 'par', p: 'Emparejá cada forma con para qué conviene',
           o: [['$a+bi$', 'Sumar y restar'], ['$\\rho\\left[\\cos\\varphi+i\\sen\\varphi\\right]$', 'Potencias y raíces'], ['$\\rho\\,e^{i\\varphi}$', 'Productos y logaritmos']],
           x: 'Cada forma hace fácil una operación distinta. Elegir la forma correcta antes de arrancar ahorra media carilla.' },
+      ],
+    },
+    /* ------------------------------------------------------------------ */
+    {
+      id: 'u8l7',
+      titulo: 'Continuidad y derivada',
+      objetivo: 'Analizar continuidad (incluso a trozos) y derivar funciones complejas.',
+      teoria: [
+        { h: 'Continuidad' },
+        { def: ['Continua en un punto', '$f$ es continua en $z_0$ si $$\lim_{z\to z_0}f(z)=f(z_0)$$ es decir: **el límite tiene que coincidir con la imagen**.'] },
+        { lista: [
+          'Una función **polinómica** es continua en todo el plano.',
+          'Una función **racional** es continua salvo donde el denominador se anula.',
+        ] },
+        { ej: ['¿Dónde es continua $f(z)=\dfrac{z-1}{z^{2}-(2-i)z-2i}$?', [
+          'Busco los ceros del denominador con la resolvente: $a=1$, $b=-(2-i)$, $c=-2i$',
+          'Sale $\;z=2\;$ y $\;z=-i$',
+          'Verifico factorizando: $\;(z-2)(z+i)=z^{2}+iz-2z-2i=z^{2}-(2-i)z-2i$ ✓',
+          'Es continua en $\;\mathbb{C}-\{2,\,-i\}$',
+        ]] },
+        { h: 'Funciones a trozos' },
+        { p: 'Cuando la función está definida por partes, hay que comparar **el límite con la imagen**. Es el ejercicio que la profe dejó de tarea.' },
+        { ej: ['Analizar la continuidad en $z=2$ de $f(z)=\begin{cases} \dfrac{z^{2}-z-2}{z-2} & z\neq 2 \\[4pt] -\dfrac{3}{2}z & z=2 \end{cases}$', [
+          '**Límite:** factorizo el numerador: $\;z^{2}-z-2=(z-2)(z+1)$',
+          'Simplifico y evalúo: $\;\lim_{z\to 2}(z+1)=3$',
+          '**Imagen:** $\;f(2)=-\dfrac{3}{2}\cdot 2=-3$',
+          'Comparo: $\;3\neq -3$',
+          'La función es **discontinua** en $z=2$',
+        ]] },
+        { truco: 'Siempre los mismos dos pasos: calculás el límite (factorizando y simplificando si da $\frac{0}{0}$) y calculás la imagen. Si coinciden es continua; si no, no.' },
+        { h: 'Derivada' },
+        { def: ['Derivada compleja', '$$f\'(z_0)=\lim_{z\to z_0}\frac{f(z)-f(z_0)}{z-z_0}$$ si ese límite existe. Si $f$ es derivable en $z_0$, entonces es continua en $z_0$.'] },
+        { truco: 'La buena noticia: **se usan las mismas reglas de derivación que para números reales**. Potencia, producto, cociente, cadena. La $i$ se trata como una constante.' },
+        { ej: ['Derivar $f(z)=3z^{4}-5z^{3}+2z$', [
+          'Regla de la potencia, término a término:',
+          '$\;f\'(z)=12z^{3}-15z^{2}+2$',
+        ]] },
+        { ej: ['Derivar $y=\sen(5z)\cdot\cos(z)$  — del pizarrón', [
+          'Es un producto: $\;(f\cdot g)\'=f\'g+fg\'$',
+          '$\;f=\sen(5z) \Rightarrow f\'=5\cos(5z)$',
+          '$\;g=\cos(z) \Rightarrow g\'=-\sen(z)$',
+          '$\;y\'=5\cos(5z)\cos(z)+\sen(5z)\cdot\left[-\sen(z)\right]$',
+        ]] },
+        { h: 'Funciones analíticas' },
+        { def: ['Analítica en un punto', '$f$ es analítica en $z_0$ si es derivable en $z_0$ **y en todo punto de una vecindad** de $z_0$.'] },
+        { ojo: 'Analítica **no** es lo mismo que derivable. Derivable pide un solo punto; analítica pide todo un entorno alrededor.' },
+        { p: 'Los **polinomios son derivables en todo** $\mathbb{C}$: por eso se llaman funciones **enteras**. Una racional deja de ser analítica en los ceros del denominador.' },
+        { ej: ['¿Dónde no es analítica $f(z)=\dfrac{z-4+3i}{z^{2}-6z+25}$?', [
+          'Igualo el denominador a cero: $\;z^{2}-6z+25=0$',
+          '$\;z=\dfrac{6\pm\sqrt{36-100}}{2}=\dfrac{6\pm\sqrt{-64}}{2}=\dfrac{6\pm 8i}{2}=3\pm 4i$',
+          'No es analítica en $\;3+4i\;$ ni en $\;3-4i$',
+        ]] },
+      ],
+      formulas: [
+        ['Continuidad', '\lim_{z\to z_0}f(z)=f(z_0)'],
+        ['Derivada', 'f\'(z_0)=\lim_{z\to z_0}\frac{f(z)-f(z_0)}{z-z_0}'],
+        ['Reglas', '\text{las mismas que en variable real}'],
+        ['Producto', '(f\cdot g)\'=f\'g+f\,g\''],
+        ['No analítica en', '\text{los ceros del denominador}'],
+      ],
+      ejercicios: [
+        { t: 'mc', p: '¿Cuándo es continua $f$ en $z_0$?',
+          o: ['Cuando el límite coincide con la imagen', 'Cuando existe el límite', 'Cuando existe la imagen', 'Cuando es derivable'], r: 0,
+          x: 'Hacen falta las dos cosas y que además sean iguales: $\\lim_{z\\to z_0}f(z)=f(z_0)$.' },
+        { t: 'mc', p: 'Factorizá el numerador de $\\dfrac{z^{2}-z-2}{z-2}$',
+          o: ['$(z-2)(z+1)$', '$(z-2)(z-1)$', '$(z+2)(z-1)$', '$(z-2)^{2}$'], r: 0,
+          x: 'Buscás dos números que multiplicados den $-2$ y sumados $-1$: son $-2$ y $1$.' },
+        { t: 'in', p: 'Entonces $\\lim_{z\\to 2}\\dfrac{z^{2}-z-2}{z-2}$ vale', r: ['3'], ph: 'Un número',
+          x: 'Simplificás el $(z-2)$ y queda $\\lim_{z\\to 2}(z+1)=3$.' },
+        { t: 'in', p: 'Si en $z=2$ la función vale $f(2)=-\\dfrac{3}{2}z$, ¿cuánto da $f(2)$?', r: ['-3'], ph: 'Puede ser negativo', teclas: ['-'],
+          x: '$-\\frac{3}{2}\\cdot 2=-3$.' },
+        { t: 'vf', p: 'Con límite $3$ e imagen $-3$, la función es continua en $z=2$.', r: false,
+          x: 'No coinciden, así que es **discontinua**. Ese es justo el punto del ejercicio.' },
+        { t: 'mc', p: 'Las reglas para derivar una función compleja son',
+          o: ['Las mismas que en variable real', 'Distintas: hay que usar Cauchy-Riemann', 'Sólo vale la regla de la potencia', 'Hay que separar en $u$ y $v$ primero'], r: 0,
+          x: 'Potencia, producto, cociente y cadena funcionan igual. La $i$ es una constante más.' },
+        { t: 'mc', p: 'Derivá $f(z)=3z^{4}-5z^{3}+2z$',
+          o: ['$12z^{3}-15z^{2}+2$', '$12z^{3}-15z^{2}+2z$', '$3z^{3}-5z^{2}+2$', '$12z^{4}-15z^{3}+2$'], r: 0,
+          x: 'Término a término. El $2z$ deriva en $2$, sin $z$.' },
+        { t: 'mc', p: 'Derivá $f(z)=4z^{3}-(3+i)z^{2}-5z+4$  (Práctica 7)',
+          o: ['$12z^{2}-2(3+i)z-5$', '$12z^{2}-(3+i)z-5$', '$12z^{2}-2(3+i)z-5+4$', '$12z^{2}-2(3+i)z$'], r: 0,
+          x: 'El $(3+i)$ es constante: baja el $2$ del exponente. El $+4$ deriva en cero.' },
+        { t: 'mc', p: 'Derivá $y=\\sen(5z)\\cos(z)$',
+          o: ['$5\\cos(5z)\\cos(z)-\\sen(5z)\\sen(z)$', '$5\\cos(5z)\\sen(z)$', '$-5\\cos(5z)\\sen(z)$', '$\\cos(5z)\\cos(z)$'], r: 0,
+          x: 'Producto: $f\'g+fg\'$, con $f\'=5\\cos(5z)$ y $g\'=-\\sen(z)$.' },
+        { t: 'vf', p: 'Ser derivable en un punto alcanza para ser analítica ahí.', r: false,
+          x: 'No: analítica pide ser derivable en **todo un entorno** del punto, no sólo en el punto.' },
+        { t: 'mc', p: '¿Por qué los polinomios son funciones enteras?',
+          o: ['Porque son derivables en todo punto del plano', 'Porque no tienen denominador', 'Porque tienen coeficientes enteros', 'Porque son continuos'], r: 0,
+          x: 'Entera = analítica en todo $\\mathbb{C}$, y un polinomio es derivable en cualquier punto.' },
+        { t: 'hue', p: 'Para $f(z)=\\dfrac{z-4+3i}{z^{2}-6z+25}$, no es analítica en $a\\pm bi$:',
+          tpl: '$a=$ ___ y $b=$ ___', r: [['3'], ['4']],
+          x: 'Resolvente: $z=\\frac{6\\pm\\sqrt{-64}}{2}=\\frac{6\\pm 8i}{2}=3\\pm 4i$.' },
+      ],
+    },
+
+    /* ------------------------------------------------------------------ */
+    {
+      id: 'u8l8',
+      titulo: 'Cauchy-Riemann',
+      objetivo: 'Probar si una función es analítica usando derivadas parciales.',
+      teoria: [
+        { p: 'Hay una prueba concreta para decidir si una función compleja es analítica, y usa **derivadas parciales** de su parte real e imaginaria.' },
+        { def: ['Ecuaciones de Cauchy-Riemann', 'Si $f(z)=u(x,y)+i\,v(x,y)$ es derivable en $z=x+iy$, entonces $$u_x=v_y \qquad\text{y}\qquad u_y=-v_x$$'] },
+        { ojo: 'Son **dos** ecuaciones y hay que verificar las dos. Cuidado con el signo menos: va en la segunda, sobre $v_x$.' },
+        { num: [
+          'Reemplazar $z=x+iy$ y desarrollar',
+          'Separar $u(x,y)$ (lo real) y $v(x,y)$ (lo que multiplica a $i$)',
+          'Calcular las cuatro parciales',
+          'Verificar las dos ecuaciones y ver **para qué puntos** se cumplen',
+        ] },
+        { truco: 'Al derivar respecto de $x$, la $y$ queda constante, y al revés. En el pizarrón la profe lo anota al costado: "$y$ cte", "$x$ cte".' },
+        { ej: ['¿Es analítica $f(z)=z^{2}+z$?  — el ejemplo (1) del pizarrón', [
+          'Reemplazo: $\;(x+iy)^{2}+(x+iy)=x^{2}-y^{2}+2xyi+x+iy$',
+          'Separo: $\;u=x^{2}-y^{2}+x\;$ y $\;v=2xy+y$',
+          'Parciales: $\;u_x=2x+1$, $\;u_y=-2y$, $\;v_x=2y$, $\;v_y=2x+1$',
+          'Primera: $\;u_x=2x+1=v_y$ ✓',
+          'Segunda: $\;u_y=-2y=-v_x$ ✓',
+          'Se cumplen para todo $x$ e $y$: **analítica en todo** $\mathbb{C}$',
+        ]] },
+        { ej: ['¿Es analítica $f(z)=z^{2}+4z-1$?', [
+          'Separo: $\;u=x^{2}-y^{2}-1+4x\;$ y $\;v=2xy+4y$',
+          'Parciales: $\;u_x=2x+4$, $\;u_y=-2y$, $\;v_x=2y$, $\;v_y=2x+4$',
+          'Las dos ecuaciones se cumplen siempre: **analítica en todo** $\mathbb{C}$',
+        ]] },
+        { truco: 'Control rápido: si $f(z)$ es un **polinomio en $z$**, ya es entera y Cauchy-Riemann se va a cumplir. Los ejercicios que valen la pena son los que vienen ya separados en $u$ y $v$: ahí sí puede fallar.' },
+        { h: 'Cuando NO es analítica' },
+        { ej: ['$f(z)=(2x^{2}+y)+i(y^{2}-x)$  — el otro ejemplo del pizarrón', [
+          'Ya viene separada: $\;u=2x^{2}+y\;$ y $\;v=y^{2}-x$',
+          'Parciales: $\;u_x=4x$, $\;u_y=1$, $\;v_x=-1$, $\;v_y=2y$',
+          'Segunda: $\;u_y=1$ y $-v_x=1$ ✓ (se cumple siempre)',
+          'Primera: $\;4x=2y$, o sea $\;y=2x$',
+          'Eso es sólo una **recta**. Conclusión: **no es analítica para todo** $z\in\mathbb{C}$',
+        ]] },
+        { ojo: 'Si Cauchy-Riemann se cumple únicamente sobre una recta o una curva, la respuesta es que no es analítica: una recta no contiene ninguna vecindad, y analítica pide todo un entorno.' },
+      ],
+      formulas: [
+        ['Cauchy-Riemann', 'u_x=v_y \qquad u_y=-v_x'],
+        ['Notación larga', '\frac{\partial u}{\partial x}=\frac{\partial v}{\partial y} \qquad \frac{\partial u}{\partial y}=-\frac{\partial v}{\partial x}'],
+        ['Control', 'f \text{ polinomio en } z \;\Rightarrow\; \text{entera}'],
+      ],
+      ejercicios: [
+        { t: 'mc', p: '¿Cuáles son las ecuaciones de Cauchy-Riemann?',
+          o: ['$u_x=v_y$ y $u_y=-v_x$', '$u_x=v_x$ y $u_y=v_y$', '$u_x=-v_y$ y $u_y=v_x$', '$u_x+v_y=0$ y $u_y+v_x=0$'], r: 0,
+          x: 'El signo menos va en la segunda, delante de $v_x$. Cambiarlo de lugar es el error más común.' },
+        { t: 'hue', p: 'Para $f(z)=z^{2}+z$, separando parte real e imaginaria:',
+          tpl: '$u=x^{2}-y^{2}+$ ___ y $v=2xy+$ ___', r: [['x'], ['y']],
+          x: 'Desarrollando $(x+iy)^{2}+(x+iy)$: la parte real es $x^{2}-y^{2}+x$ y la imaginaria $2xy+y$.' },
+        { t: 'mc', p: 'Con $u=x^{2}-y^{2}+x$, ¿cuánto vale $u_x$?',
+          o: ['$2x+1$', '$2x$', '$-2y$', '$2x-2y+1$'], r: 0,
+          x: 'Derivás respecto de $x$ con $y$ constante: el $-y^{2}$ desaparece.' },
+        { t: 'mc', p: 'Con $v=2xy+y$, ¿cuánto vale $v_y$?',
+          o: ['$2x+1$', '$2y$', '$2x$', '$2xy$'], r: 0,
+          x: 'Respecto de $y$: $2xy$ da $2x$ y el $y$ da $1$. Coincide con $u_x$ ✓' },
+        { t: 'vf', p: '$f(z)=z^{2}+z$ es analítica en todo el plano complejo.', r: true,
+          x: 'Las dos ecuaciones se cumplen para cualquier $x$ e $y$. Además es polinomio: entera.' },
+        { t: 'mc', p: '¿Es analítica $f(z)=z^{2}+4z-1$?',
+          o: ['Sí, en todo $\\mathbb{C}$', 'Sólo sobre una recta', 'No, en ningún punto', 'Sólo en el origen'], r: 0,
+          x: '$u_x=2x+4=v_y$ ✓ y $u_y=-2y=-v_x$ ✓. Es polinomio: entera.' },
+        { t: 'mc', p: 'Si $f(z)$ es un polinomio en $z$, entonces',
+          o: ['Es entera y cumple Cauchy-Riemann en todo el plano', 'Nunca cumple Cauchy-Riemann', 'Sólo es analítica en el origen', 'Hay que verificar caso por caso'], r: 0,
+          x: 'Derivable en todo punto. Sirve como control antes de hacer las cuentas.' },
+        { t: 'mc', p: 'Para $f(z)=(2x^{2}+y)+i(y^{2}-x)$, Cauchy-Riemann se cumple sólo si',
+          o: ['$y=2x$', '$y=x$', '$x=0$', 'Siempre'], r: 0,
+          x: 'De $u_x=v_y$: $4x=2y$, o sea $y=2x$. La otra se cumple siempre.' },
+        { t: 'mc', p: 'Entonces, ¿esa función es analítica?',
+          o: ['No, porque una recta no contiene ningún entorno', 'Sí, sobre la recta $y=2x$', 'Sí, en todo el plano', 'Sí, sólo en el origen'], r: 0,
+          x: 'Cumplirse sobre una recta no alcanza. No es analítica para todo $z\\in\\mathbb{C}$.' },
+        { t: 'mc', p: 'Al calcular $u_x$, ¿qué hacés con la $y$?',
+          o: ['La trato como constante', 'La derivo también', 'La reemplazo por cero', 'La paso al otro miembro'], r: 0,
+          x: 'Es derivada **parcial**: se deriva respecto de una variable y la otra queda fija.' },
       ],
     },
   ],
@@ -4817,6 +5070,7 @@ const SENDERO_TOP = 34;   // debe coincidir con el padding de .sendero
 
 const SECCIONES = [
   { id: 'mapa', rot: 'Mapa', ic: 'mapa' },
+  { id: 'plan', rot: 'Plan', ic: 'reloj' },
   { id: 'practica', rot: 'Repaso', ic: 'diana' },
   { id: 'formulas', rot: 'Fórmulas', ic: 'hoja' },
   { id: 'progreso', rot: 'Progreso', ic: 'grafico' },
@@ -4886,6 +5140,7 @@ function dibujar() {
   const v = $('#vista');
   v.textContent = '';
   if (vistaActual === 'mapa') pantallaMapa(v);
+  else if (vistaActual === 'plan') pantallaPlan(v);
   else if (vistaActual === 'practica') pantallaPractica(v);
   else if (vistaActual === 'formulas') pantallaFormulas(v);
   else if (vistaActual === 'progreso') pantallaProgreso(v);
@@ -5409,6 +5664,202 @@ function pantallaPractica(v) {
         el('span', { txt: u.titulo }),
         el('span', { cls: 'cinta', estilo: { marginLeft: 'auto' }, txt: n + ' ' + plural(n, 'ejercicio') }))));
   }
+}
+
+;
+/* ===========================================================
+   plan.js — plan de estudio hasta el parcial
+   Una hora por día. Cada día abre las lecciones que tocan.
+   =========================================================== */
+
+const PLAN = {
+  examen: '2026-10-07',
+  horas: 1,
+  dias: [
+    { n: 1, fase: 'Cimientos', u: 'u0', titulo: 'Primitivas, tabla y sustitución', lecciones: ['u0l1', 'u0l2'],
+      nota: 'Arrancá acá porque todo lo demás se apoya en esto. Copiá la tabla a mano en una hoja: se fija mucho mejor que leyéndola.' },
+    { n: 2, fase: 'Cimientos', u: 'u0', titulo: 'Integración por partes', lecciones: ['u0l3'],
+      nota: 'Aprendete LIATE de memoria. Después rehacé los ejercicios 2 y 3 del pizarrón del 30/7 sin mirar la solución.' },
+    { n: 3, fase: 'Cimientos', u: 'u0', titulo: 'Fracciones simples: los 3 casos', lecciones: ['u0l4', 'u0l5'],
+      nota: 'El día que más rinde de todo el plan: este método vuelve a aparecer entero en la transformada inversa de Laplace.' },
+
+    { n: 4, fase: 'Primer orden', u: 'u1', titulo: 'Qué es una EDO y cómo reconocer el método', lecciones: ['u1l1', 'u1l2', 'u1l3'],
+      nota: 'Tres lecciones pero cortas. Lo importante es el árbol de decisión: mirar una ecuación y saber con qué atacarla.' },
+    { n: 5, fase: 'Primer orden', u: 'u2', titulo: 'Variables separables', lecciones: ['u2l1', 'u2l2'],
+      nota: 'El método más usado. Si te trabás despejando, el problema son las propiedades de logaritmos, no la ecuación.' },
+    { n: 6, fase: 'Primer orden', u: 'u2', titulo: 'Condición inicial y trigonométricas', lecciones: ['u2l3', 'u2l4'],
+      nota: 'La condición inicial se reemplaza al final, sobre la solución ya despejada. Nunca antes.' },
+    { n: 7, fase: 'Primer orden', u: 'u3', titulo: 'Lineales y factor de integración', lecciones: ['u3l1', 'u3l2', 'u3l3'],
+      nota: 'Tres lecciones, pero la 2 y la 3 son el mismo método aplicado. El atajo $P=k/x \\Rightarrow I=x^{k}$ te ahorra media hoja.' },
+    { n: 8, fase: 'Primer orden', u: 'u3', titulo: 'Bernoulli y arranque de homogéneas', lecciones: ['u3l4', 'u4l1'],
+      nota: 'Bernoulli cae poco pero está en el cuadernillo. Lo de homogéneas de hoy es sólo reconocerlas por el grado.' },
+    { n: 9, fase: 'Primer orden', u: 'u4', titulo: 'Homogéneas', lecciones: ['u4l2', 'u4l3'],
+      nota: 'Ojo con $dy = x\\,du + u\\,dx$: es derivada del producto. Olvidarse un término es el error número uno de esta unidad.' },
+
+    { n: 10, fase: 'Consolidación', u: 'u4', titulo: 'Repaso mixto de primer orden', lecciones: [], repaso: true,
+      nota: 'Día bisagra, sin lecciones nuevas. Entrá a la pestaña Repaso y hacé dos tandas. El objetivo es mirar una ecuación cualquiera y saber en 5 segundos qué método usar.' },
+
+    { n: 11, fase: 'Segundo orden', u: 'u5', titulo: 'Ecuación característica y raíces reales', lecciones: ['u5l1', 'u5l2'],
+      nota: 'Se vuelve mecánico rápido: armás la característica, sacás el discriminante y eso te dice en qué caso estás.' },
+    { n: 12, fase: 'Segundo orden', u: 'u5', titulo: 'Raíces complejas y solución particular', lecciones: ['u5l3', 'u5l4'],
+      nota: 'Acordate de derivar la solución general **antes** de meter la segunda condición inicial.' },
+
+    { n: 13, fase: 'Laplace', u: 'u6', titulo: 'Definición, tabla e inversa', lecciones: ['u6l1', 'u6l2', 'u6l3'],
+      nota: 'La tabla hay que saberla. Truco: el seno lleva $k$ arriba, el coseno lleva $s$. Y practicá $\\mathcal{L}(t)$ por definición, que la piden explícitamente en la Práctica 3.' },
+    { n: 14, fase: 'Laplace', u: 'u6', titulo: 'Derivadas, resolver EDO y traslación', lecciones: ['u6l4', 'u6l5', 'u6l6'],
+      nota: 'Día pesado pero es el corazón del tema. Las condiciones iniciales entran solas al transformar: esa es toda la gracia del método.' },
+
+    { n: 15, fase: 'Fourier', u: 'u7', titulo: 'Series de Fourier', lecciones: ['u7l1', 'u7l2', 'u7l3', 'u7l4'],
+      nota: 'Es el tema más mecánico de todos: son tres integrales y listo. Fijate primero si la función es par o impar: te ahorra la mitad del trabajo.' },
+
+    { n: 16, fase: 'Variable compleja', u: 'u8', titulo: 'Complejos: raíces, regiones y límites', lecciones: ['u8l1', 'u8l2', 'u8l3', 'u8l4', 'u8l5', 'u8l6'],
+      nota: 'Día largo, pero las tres primeras son repaso de Álgebra y vuelan. Prestale atención a **radicación**: en el pizarrón hicieron $\\sqrt{3+4i}$ y $\\sqrt[3]{8i}$, así que la fórmula de $w_k$ hay que tenerla. Y en los límites, acordate de probar varias trayectorias, no sólo los ejes.' },
+
+    { n: 17, fase: 'Cierre', u: 'u8', titulo: 'Cauchy-Riemann y repaso final', lecciones: ['u8l7', 'u8l8'], repaso: true,
+      nota: 'Lo último que vieron en clase, así que es lo más probable que tomen: continuidad a trozos, derivada y Cauchy-Riemann. Cerrá con una tanda de Repaso y una leída al Formulario. Después dormí bien. **Las funciones armónicas no entran**: no pierdas tiempo ahí.' },
+  ],
+};
+
+const FASES = {
+  'Cimientos': { u: 'u0', desc: 'Integrales: sustitución, partes y fracciones simples' },
+  'Primer orden': { u: 'u2', desc: 'Separables, lineales, Bernoulli y homogéneas' },
+  'Consolidación': { u: 'u4', desc: 'Que reconozcas el método de una mirada' },
+  'Segundo orden': { u: 'u5', desc: 'Ecuación característica y los tres casos' },
+  'Laplace': { u: 'u6', desc: 'Tabla, inversa y resolución de ecuaciones' },
+  'Fourier': { u: 'u7', desc: 'Coeficientes y desarrollo' },
+  'Variable compleja': { u: 'u8', desc: 'Derivada, analiticidad y Cauchy-Riemann' },
+  'Cierre': { u: 'u3', desc: 'Repaso general' },
+};
+
+/** Fecha del día n del plan: se cuenta hacia atrás desde el examen. */
+function fechaDelDia(n) {
+  return sumarDias(PLAN.examen, n - PLAN.dias.length - 1);
+}
+
+function diasParaElExamen() { return diasEntre(hoy(), PLAN.examen); }
+
+function diaDeHoy() {
+  for (const d of PLAN.dias) if (fechaDelDia(d.n) === hoy()) return d.n;
+  return null;
+}
+
+function planHecho(n) { return !!(Store.est.plan && Store.est.plan[n]); }
+
+function marcarDia(n, valor) {
+  Store.est.plan = Store.est.plan || {};
+  if (valor) Store.est.plan[n] = hoy(); else delete Store.est.plan[n];
+  Store.guardar();
+}
+
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const SEMANA = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+
+function fechaCorta(iso) {
+  const p = iso.split('-').map(Number);
+  const d = new Date(Date.UTC(p[0], p[1] - 1, p[2]));
+  return SEMANA[d.getUTCDay()] + ' ' + p[2] + ' ' + MESES[p[1] - 1];
+}
+
+/* -----------------------------------------------------------
+   Pantalla
+   ----------------------------------------------------------- */
+
+function pantallaPlan(v) {
+  const faltan = diasParaElExamen();
+  const hechos = PLAN.dias.filter((d) => planHecho(d.n)).length;
+  const hoyN = diaDeHoy();
+
+  v.appendChild(el('h1', { cls: 'titulo-pantalla', txt: 'Plan' }));
+  v.appendChild(el('p', { cls: 'bajada',
+    txt: PLAN.dias.length + ' días, una hora por día, hasta el parcial. Tocá cualquier día para abrir sus lecciones.' }));
+
+  /* --- cuenta regresiva --- */
+  v.appendChild(el('div', { cls: 'mosaico' },
+    el('div', { cls: 'loza racha' },
+      el('div', { cls: 'cifra', txt: faltan > 0 ? String(faltan) : (faltan === 0 ? '¡Hoy!' : '—') }),
+      el('div', { cls: 'leyenda', txt: faltan > 0 ? plural(faltan, 'día para el parcial', 'días para el parcial') : (faltan === 0 ? 'Es el parcial' : 'Parcial pasado') })),
+    el('div', { cls: 'loza tino' },
+      el('div', { cls: 'cifra', txt: hechos + '/' + PLAN.dias.length }),
+      el('div', { cls: 'leyenda', txt: 'Días completados' }))));
+
+  const riel = el('div', { cls: 'riel', estilo: { '--u': 'var(--correcto)', marginBottom: '20px' } },
+    el('i', { estilo: { width: (hechos / PLAN.dias.length * 100).toFixed(1) + '%' } }));
+  v.appendChild(riel);
+
+  /* --- días agrupados por fase --- */
+  let faseActual = null;
+  for (const d of PLAN.dias) {
+    if (d.fase !== faseActual) {
+      faseActual = d.fase;
+      const f = FASES[d.fase] || { u: d.u, desc: '' };
+      v.appendChild(el('div', { cls: 'plan-fase', estilo: { '--u': 'var(--' + f.u + ')' } },
+        el('div', { cls: 'plan-fase-linea' }),
+        el('div', {},
+          el('div', { cls: 'rotulo-eyebrow', estilo: { color: 'var(--u)' }, txt: d.fase }),
+          el('div', { estilo: { fontSize: 'var(--t-xs)', color: 'var(--tinta-2)' }, txt: f.desc }))));
+    }
+    v.appendChild(tarjetaDia(d, hoyN));
+  }
+
+  v.appendChild(el('hr', { cls: 'regla' }));
+  v.appendChild(el('div', { cls: 'bloque truco' },
+    el('div', { cls: 'bloque-titulo', txt: 'Si un día te lo saltás' }),
+    el('div', { html: tx('No arrastres la culpa ni intentes hacer dos días juntos: hacé el día que toca según la fecha y recuperá el que falta en el **día 10** o en el **17**, que son de repaso. Perder un día no rompe el plan; abandonarlo sí.') })));
+}
+
+function tarjetaDia(d, hoyN) {
+  const hecho = planHecho(d.n);
+  const esHoy = d.n === hoyN;
+  const fecha = fechaDelDia(d.n);
+
+  const tilde = el('button', {
+    cls: 'plan-tilde', type: 'button', role: 'checkbox',
+    'aria-checked': hecho ? 'true' : 'false',
+    'aria-label': 'Marcar el día ' + d.n + ' como hecho',
+    html: hecho ? icono('tilde') : '',
+    on: {
+      click: (e) => {
+        e.stopPropagation();
+        marcarDia(d.n, !hecho);
+        brindis(!hecho ? '¡Día ' + d.n + ' listo!' : 'Día ' + d.n + ' desmarcado');
+        dibujar();
+      },
+    },
+  });
+
+  const cuerpo = el('div', { estilo: { flex: '1', minWidth: '0' } },
+    el('div', { cls: 'plan-cab' },
+      el('span', { cls: 'plan-num', txt: 'Día ' + d.n }),
+      el('span', { cls: 'plan-fecha', txt: fechaCorta(fecha) }),
+      esHoy ? el('span', { cls: 'cinta ok', txt: 'HOY' }) : null),
+    el('div', { cls: 'plan-tit', txt: d.titulo }),
+    el('p', { cls: 'plan-nota', html: tx(d.nota) }));
+
+  const chips = el('div', { cls: 'plan-lecciones' });
+  for (const id of d.lecciones) {
+    const ref = Juego.buscarLeccion(id);
+    if (!ref) continue;
+    const listo = (Juego.datosLeccion(id).vueltas || 0) > 0;
+    chips.appendChild(el('button', {
+      cls: 'lec-chip' + (listo ? ' lista' : ''), type: 'button',
+      estilo: { '--u': 'var(--' + ref.u.id + ')' },
+      on: { click: () => abrirLeccion(id) },
+    },
+      el('span', { cls: 'lec-glifo', txt: listo ? '✓' : ref.u.glifo }),
+      el('span', { txt: ref.l.titulo })));
+  }
+  if (d.repaso) {
+    chips.appendChild(el('button', {
+      cls: 'lec-chip', type: 'button', estilo: { '--u': 'var(--correcto)' },
+      on: { click: () => ir('practica') },
+    },
+      el('span', { cls: 'lec-glifo', txt: '🔁' }),
+      el('span', { txt: 'Ir a Repaso' })));
+  }
+  cuerpo.appendChild(chips);
+
+  return el('div', { cls: 'plan-dia' + (hecho ? ' hecho' : '') + (esHoy ? ' hoy' : ''), estilo: { '--u': 'var(--' + d.u + ')' } },
+    tilde, cuerpo);
 }
 
 ;

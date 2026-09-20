@@ -8,6 +8,7 @@ const SENDERO_TOP = 34;   // debe coincidir con el padding de .sendero
 
 const SECCIONES = [
   { id: 'mapa', rot: 'Mapa', ic: 'mapa' },
+  { id: 'plan', rot: 'Plan', ic: 'reloj' },
   { id: 'practica', rot: 'Repaso', ic: 'diana' },
   { id: 'formulas', rot: 'Fórmulas', ic: 'hoja' },
   { id: 'progreso', rot: 'Progreso', ic: 'grafico' },
@@ -77,6 +78,7 @@ function dibujar() {
   const v = $('#vista');
   v.textContent = '';
   if (vistaActual === 'mapa') pantallaMapa(v);
+  else if (vistaActual === 'plan') pantallaPlan(v);
   else if (vistaActual === 'practica') pantallaPractica(v);
   else if (vistaActual === 'formulas') pantallaFormulas(v);
   else if (vistaActual === 'progreso') pantallaProgreso(v);

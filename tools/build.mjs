@@ -25,7 +25,7 @@ const UNIDADES = fs.readdirSync(path.join(ROOT, 'src/content'))
   .filter((f) => /^u\d+\.js$/.test(f))
   .sort((a, b) => parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10));
 
-const MODULOS = ['util.js', 'store.js', 'mate.js', 'engine.js', 'render.js', 'screens.js', 'profe-api.js', 'paneles.js', 'app.js'];
+const MODULOS = ['util.js', 'store.js', 'mate.js', 'engine.js', 'render.js', 'screens.js', 'plan.js', 'profe-api.js', 'paneles.js', 'app.js'];
 
 const js = [
   rd('vendor/katex.min.js'),
