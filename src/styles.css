@@ -985,3 +985,63 @@ hr.regla { border: 0; border-top: 1px solid var(--borde); margin-block: 20px; }
 
 .katex-display { margin: .7em 0; overflow-x: auto; overflow-y: hidden; padding-bottom: 2px; }
 .katex { font-size: 1.04em; }
+
+/* ============================================================
+   Plan de estudio
+   ============================================================ */
+
+.plan-fase { display: flex; align-items: center; gap: 11px; margin: 22px 0 10px; }
+.plan-fase-linea { width: 4px; align-self: stretch; min-height: 34px; border-radius: 999px; background: var(--u); flex: none; }
+
+.plan-dia {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--papel-2);
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--u);
+  border-radius: var(--r-md);
+  padding: 13px 14px;
+}
+.plan-dia + .plan-dia { margin-top: 9px; }
+.plan-dia.hoy { border-color: var(--lapicera); box-shadow: 0 0 0 3px var(--anillo); }
+.plan-dia.hecho { opacity: .62; }
+.plan-dia.hecho .plan-tit { text-decoration: line-through; text-decoration-thickness: 2px; }
+
+.plan-tilde {
+  appearance: none; cursor: pointer; flex: none;
+  width: 26px; height: 26px; margin-top: 1px;
+  border: 2px solid var(--borde-2); border-radius: 8px;
+  background: var(--papel-2); color: #fff;
+  display: grid; place-items: center; padding: 0;
+  transition: background .15s, border-color .15s;
+}
+.plan-tilde svg { width: 17px; height: 17px; stroke-width: 3; }
+.plan-tilde[aria-checked="true"] { background: var(--correcto); border-color: var(--correcto); }
+:root[data-theme="dark"] .plan-tilde[aria-checked="true"] { color: #0C1512; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .plan-tilde[aria-checked="true"] { color: #0C1512; } }
+
+.plan-cab { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+.plan-num { font-family: var(--display); font-weight: 800; font-size: var(--t-xs); letter-spacing: .07em; text-transform: uppercase; color: var(--u); }
+.plan-fecha { font-size: var(--t-xs); color: var(--tinta-3); font-variant-numeric: tabular-nums; }
+.plan-tit { font-family: var(--display); font-weight: 800; font-size: var(--t-md); line-height: 1.3; }
+.plan-nota { font-size: var(--t-xs); color: var(--tinta-2); line-height: 1.55; margin-top: 5px; }
+
+.plan-lecciones { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.lec-chip {
+  appearance: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--u) 40%, var(--borde));
+  background: color-mix(in srgb, var(--u) 9%, var(--papel-2));
+  color: var(--tinta);
+  border-radius: 999px; padding: 5px 11px 5px 6px;
+  font-size: var(--t-xs); font-weight: 600; text-align: left;
+}
+.lec-chip:hover { border-color: var(--u); }
+.lec-chip.lista { opacity: .6; }
+.lec-glifo {
+  width: 19px; height: 19px; flex: none; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--u); color: #fff;
+  font-family: var(--display); font-weight: 800; font-size: 11px;
+}
+:root[data-theme="dark"] .lec-glifo { color: #101A16; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lec-glifo { color: #101A16; } }
